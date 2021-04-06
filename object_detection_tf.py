@@ -1,6 +1,7 @@
-from setup.tf_model_object_detection import Model 
-from setup.config import *
+from config.tf_model_object_detection import Model 
+from config.config import *
 import numpy as np
+import threading
 import imutils
 import cv2
 
@@ -25,6 +26,17 @@ class App:
         
         while True:
             self.flag, self.frame = self.video.read()
+
+            if THREAD == True:
+                try:
+                    self.thread_1 = threading.Thread(target=self.video.read)
+                    self.thread_1.daemon = True
+                    self.thread_1.start()
+                except RuntimeError as err:
+                    print(err)
+            else:
+                pass
+            
             if self.flag:
                 self.frame = imutils.resize(self.frame, width=int(self.frame.shape[1]))
             else:
@@ -48,6 +60,7 @@ class App:
                 cv2.rectangle(self.frame, (xmin, y1label - labelSize[1]),(xmin + labelSize[0], ymin + baseLine), BLACK, cv2.FILLED)
                 cv2.putText(self.frame, label, (xmin, ymin), cv2.FONT_HERSHEY_SIMPLEX, 0.5, WHITE, 1, cv2.LINE_AA)
 
+            cv2.namedWindow("Object Detection FRCNN Inception MSCOCO", cv2.WINDOW_NORMAL)
             cv2.imshow("Object Detection FRCNN Inception MSCOCO", self.frame)
             if cv2.waitKey(1) & 0xff == ord('q'):
                 break
